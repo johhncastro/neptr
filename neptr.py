@@ -1,12 +1,16 @@
-import json, queue, sys, subprocess, os
+import json, queue, sys, subprocess, os, shutil
 import sounddevice as sd
 from vosk import Model, KaldiRecognizer
 
 MODEL_PATH = os.path.expanduser("~/models/vosk-model-small-en-us-0.15")
-TRIGGERS = ["hello neptr", "hey neptr", "hi neptr"]
 
-# Select your default audio device, or set by index:
-# print(sd.query_devices())  # to inspect devices
+# Include both "neptr" and common mishear ("nectar")
+TRIGGERS = [
+    "hello neptr", "hey neptr", "hi neptr",
+    "hello nectar", "hey nectar", "hi nectar"
+]
+
+# Audio config
 SAMPLE_RATE = 16000
 BLOCK_SIZE = 8000  # 0.5s chunks at 16kHz
 
@@ -25,11 +29,16 @@ def callback(indata, frames, time, status):
         print(status, file=sys.stderr)
     audio_q.put(bytes(indata))
 
-def tts(text):
-    # Simple TTS; upgrade to Piper later for better quality
-    subprocess.run(["espeak-ng", "-s", "170", "-p", "40", "-v", "en-us", text])
+# Prefer espeak-ng if installed; otherwise use macOS 'say'
+USE_ESPEAK = shutil.which("espeak-ng") is not None
 
-print("NEPTR is listening… say 'hello neptr'")
+def tts(text):
+    if USE_ESPEAK:
+        subprocess.run(["espeak-ng", "-s", "170", "-p", "40", "-v", "en-us", text], check=False)
+    else:
+        subprocess.run(["say", "-r", "170", text], check=False)
+
+print('NEPTR is listening… say "hello neptr" (or "hey nectar")')
 
 with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=BLOCK_SIZE,
                        dtype='int16', channels=1, callback=callback):
@@ -41,10 +50,8 @@ with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=BLOCK_SIZE,
             if transcript:
                 print("Heard:", transcript)
                 if any(kw in transcript for kw in TRIGGERS):
-                    tts("Hello friend! I am N E P T R. How may I serve?")
+                    tts("Hello friend! I am nepter. How may I serve?")
         else:
-            # Partial results stream here if you want responsiveness:
+            # For partials, you could read:
             # partial = json.loads(rec.PartialResult()).get("partial", "")
             pass
-
-
