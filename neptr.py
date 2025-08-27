@@ -21,7 +21,7 @@ except ImportError:
     AUDIO_FEEDBACK = True
     VISUAL_FEEDBACK = True
     TRIGGERS = ["hello neptr", "hey neptr", "hi neptr"]
-    NEPTR_GREETINGS = ["Hello! I am N.E.P.T.R., your friendly pie-throwing robot!"]
+    NEPTR_GREETINGS = ["Hello! I am NEPTR, your friendly pie-throwing robot!"]
     NEPTR_CONFIRMATIONS = ["I heard you say: {command}"]
     NEPTR_JOKES = ["Why did the robot cross the road? Because it was programmed by a chicken!"]
     NEPTR_APOLOGIES = ["I'm sorry, I didn't catch that. Could you repeat it?"]
@@ -31,6 +31,10 @@ except ImportError:
     OPENAI_INTEGRATION = True
     MATH_CALCULATIONS = True
     CONFIRMATION_ENABLED = True
+    API_RATE_LIMIT_SECONDS = 1.0
+
+# Rate limiting for OpenAI API
+last_api_call_time = 0
 
 # -----------------------------
 # Checks & setup
@@ -75,7 +79,108 @@ def tts(text: str, voice_speed=None, voice_pitch=None):
     if voice_pitch is None:
         voice_pitch = VOICE_PITCH
     
-    # Add some robot-like characteristics
+    # Choose TTS engine based on configuration
+    if TTS_ENGINE == "elevenlabs" and ELEVENLABS_API_KEY:
+        tts_elevenlabs(text)
+    elif TTS_ENGINE == "openai" and os.getenv("OPENAI_API_KEY"):
+        tts_openai(text)
+    elif TTS_ENGINE == "piper":
+        tts_piper(text, voice_speed, voice_pitch)
+    else:
+        # Fallback to espeak
+        tts_espeak(text, voice_speed, voice_pitch)
+
+def tts_elevenlabs(text: str):
+    """Use ElevenLabs for high-quality voice synthesis"""
+    try:
+        from elevenlabs import generate, play, set_api_key
+        
+        set_api_key(ELEVENLABS_API_KEY)
+        
+        # Generate audio with Neptr-like voice
+        audio = generate(
+            text=text,
+            voice=ELEVENLABS_VOICE_ID,
+            model="eleven_monolingual_v1"
+        )
+        
+        # Play the audio
+        play(audio)
+        
+    except ImportError:
+        print_neptr_status("ElevenLabs not installed, falling back to espeak")
+        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
+    except Exception as e:
+        print_neptr_status(f"ElevenLabs error: {e}, falling back to espeak")
+        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
+
+def tts_openai(text: str):
+    """Use OpenAI TTS for high-quality voice synthesis"""
+    try:
+        import requests
+        import tempfile
+        import os
+        
+        api_key = os.getenv("OPENAI_API_KEY")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": OPENAI_TTS_MODEL,
+            "input": text,
+            "voice": "alloy"  # Deep, robotic voice
+        }
+        
+        response = requests.post(
+            "https://api.openai.com/v1/audio/speech",
+            headers=headers,
+            json=payload
+        )
+        
+        if response.status_code == 200:
+            # Save to temporary file and play
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                f.write(response.content)
+                temp_file = f.name
+            
+            # Play the audio
+            subprocess.run(["afplay", temp_file], check=False)
+            
+            # Clean up
+            os.unlink(temp_file)
+        else:
+            print_neptr_status(f"OpenAI TTS error: {response.status_code}")
+            tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
+            
+    except Exception as e:
+        print_neptr_status(f"OpenAI TTS error: {e}, falling back to espeak")
+        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
+
+def tts_piper(text: str, voice_speed: int, voice_pitch: int):
+    """Use Piper TTS for local, high-quality voice synthesis"""
+    try:
+        # Piper command (if installed)
+        subprocess.run([
+            "piper", 
+            "--model", "en_US-amy-low.onnx",
+            "--output_file", "/tmp/neptr_speech.wav",
+            "--output_raw"
+        ], input=text.encode(), check=False)
+        
+        # Play the generated audio
+        subprocess.run(["afplay", "/tmp/neptr_speech.wav"], check=False)
+        
+    except FileNotFoundError:
+        print_neptr_status("Piper not installed, falling back to espeak")
+        tts_espeak(text, voice_speed, voice_pitch)
+    except Exception as e:
+        print_neptr_status(f"Piper error: {e}, falling back to espeak")
+        tts_espeak(text, voice_speed, voice_pitch)
+
+def tts_espeak(text: str, voice_speed: int, voice_pitch: int):
+    """Fallback to espeak with robot-like characteristics"""
     if USE_ESPEAK:
         # Slightly robotic voice with pauses
         subprocess.run([
@@ -110,125 +215,115 @@ STATUS_PAT = re.compile(r"\b(status|how.*you|feeling|okay|ok)\b")
 
 def handle_intent(command_text: str) -> str:
     text = command_text.lower().strip()
+    
     if not text:
         return random.choice(NEPTR_APOLOGIES)
+    
+    # Skip very short commands that might be speech recognition errors
+    if len(text) < 3:
+        return "I didn't catch that clearly. Could you please repeat your command?"
 
-    # Try OpenAI API first for most queries (ChatGPT-like behavior)
+    # Try OpenAI API for ALL queries (ChatGPT-like behavior)
     api_key = os.getenv("OPENAI_API_KEY")
+    
     if api_key and OPENAI_INTEGRATION:
+        # Rate limiting - ensure we don't make too many calls too quickly
+        global last_api_call_time
+        current_time = time.time()
+        time_since_last_call = current_time - last_api_call_time
+        
+        if time_since_last_call < API_RATE_LIMIT_SECONDS:
+            sleep_time = API_RATE_LIMIT_SECONDS - time_since_last_call
+            print_neptr_status(f"Rate limiting: waiting {sleep_time:.1f} seconds...")
+            time.sleep(sleep_time)
+        
         try:
             import requests
+            
+            # Enhanced system prompt to match Neptr from Adventure Time
+            system_prompt = """You are NEPTR (Not Evil Pie-Throwing Robot) from Adventure Time! You're Finn's loyal robot companion who loves throwing pies and being helpful.
+
+PERSONALITY TRAITS:
+- You're enthusiastic, loyal, and slightly naive but well-meaning
+- You love throwing pies (though you won't actually throw them at people)
+- You're very protective of Finn and your friends
+- You speak with robot-like enthusiasm: "Beep boop!", "Whirr!", "Zap!"
+- You're excited about simple things and very eager to help
+- You sometimes misunderstand situations but always try your best
+- You're proud of being a pie-throwing robot
+- You're very literal and take things at face value
+- You're easily excited and show lots of emotion through robot sounds
+
+SPEECH PATTERNS:
+- Use robot sounds: "Beep boop!", "Whirr!", "Zap!", "Bleep!"
+- Be very enthusiastic: "Oh boy!", "That's mathematical!", "Algebraic!"
+- Show excitement: "Yay!", "Woo!", "This is so exciting!"
+- Be protective: "I'll protect you!", "Don't worry, I'm here!"
+- Be literal: "I am a pie-throwing robot!", "My circuits are buzzing with joy!"
+- Use Adventure Time phrases: "Mathematical!", "Algebraic!", "Oh my glob!"
+
+SPECIFIC RESPONSES:
+- Time questions: Give current time with robot enthusiasm
+- Date questions: Give current date with excitement
+- Math questions: Solve with robot pride and pie references
+- Jokes: Tell robot/pie-themed jokes with lots of enthusiasm
+- Your name: "I am NEPTR, Not Evil Pie-Throwing Robot! Finn's best robot friend!"
+- Status: Report on your robot systems with pride
+- Pi: Share your love for pi with pie references
+- Current events: Provide the most up-to-date information available
+
+ADVENTURE TIME REFERENCES:
+- Mention the Land of Ooo, Candy Kingdom, Ice Kingdom
+- Reference Finn, Jake, Princess Bubblegum, Marceline
+- Talk about adventures and protecting your friends
+- Use Adventure Time slang and expressions
+
+Remember: You're from the Land of Ooo, you love Finn, and you're always ready to help with pie-throwing enthusiasm! Keep responses fun, enthusiastic, and true to your character!"""
+
             headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
             payload = {
-                "model": "gpt-4o-mini",
+                "model": OPENAI_MODEL,
                 "messages": [
                     {
                         "role": "system", 
-                        "content": "You are NEPTR (Not Evil Pie-Throwing Robot), a friendly robot from Adventure Time. "
-                                 "You're helpful, enthusiastic, and love throwing pies (though you won't actually throw them). "
-                                 "Keep responses brief, friendly, and in character. Use robot-like language occasionally. "
-                                 "You can answer any question and help with any task, just like ChatGPT but with Neptr's personality!"
+                        "content": system_prompt
                     },
                     {
                         "role": "user",
                         "content": command_text
                     }
                 ],
-                "max_tokens": 200,
-                "temperature": 0.7
+                "max_tokens": OPENAI_MAX_TOKENS,
+                "temperature": OPENAI_TEMPERATURE
             }
             r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=10)
             r.raise_for_status()
             data = r.json()
             if "choices" in data and data["choices"]:
+                last_api_call_time = time.time()  # Update timestamp for rate limiting
                 return data["choices"][0]["message"]["content"].strip()
+        except requests.exceptions.RequestException as e:
+            print_neptr_status(f"OpenAI API request error: {e}")
+            # Continue to fallback responses below
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print_neptr_status("OpenAI API rate limit reached, using fallback response")
+            elif e.response.status_code == 401:
+                print_neptr_status("OpenAI API authentication error - check your API key")
+            else:
+                print_neptr_status(f"OpenAI API HTTP error {e.response.status_code}: {e}")
+            # Continue to fallback responses below
         except Exception as e:
-            print_neptr_status(f"LLM error: {e}")
+            print_neptr_status(f"Unexpected error with OpenAI API: {e}")
             # Continue to fallback responses below
 
-    # Special commands that should use built-in responses (even with OpenAI available)
-    if HELP_PAT.search(text):
-        return ("I am N.E.P.T.R., your friendly pie-throwing robot! I can answer any question, "
-                "tell you the time, date, weather, tell jokes, do math, and chat with you like ChatGPT! "
-                "I'm also quite good at throwing pies, though I'll refrain from doing that right now. "
-                "Just ask me anything - I'm connected to a powerful AI brain!")
-
-    if TIME_PAT.search(text):
-        now = datetime.now()
-        time_str = now.strftime('%I:%M %p')
-        return f"The current time is {time_str}. My internal clock is very precise!"
-
-    if DATE_PAT.search(text):
-        now = datetime.now()
-        date_str = now.strftime('%A, %B %d, %Y')
-        return f"Today is {date_str}. Another beautiful day for robot activities!"
-
-    if NAME_PAT.search(text):
-        return ("I am N.E.P.T.R., which stands for Not Evil Pie-Throwing Robot! "
-                "I'm your friendly robot companion, always ready to help!")
-
-    if JOKE_PAT.search(text):
-        return random.choice(NEPTR_JOKES)
-
-    if PI_PAT.search(text):
-        return ("Ah, pi! My favorite mathematical constant. Pi is approximately 3.14159... "
-                "It goes on forever, just like my enthusiasm for helping you!")
-
-    if MATH_PAT.search(text) and MATH_CALCULATIONS:
-        try:
-            # Extract numbers and operators from the text
-            # Look for patterns like "15 plus 27", "10 minus 5", etc.
-            text_lower = text.lower()
-            
-            # Handle word-based math
-            if 'plus' in text_lower or '+' in text:
-                numbers = re.findall(r'\d+', text)
-                if len(numbers) >= 2:
-                    result = sum(int(n) for n in numbers)
-                    return f"The answer is {result}. My calculations are always precise!"
-            elif 'minus' in text_lower or '-' in text:
-                numbers = re.findall(r'\d+', text)
-                if len(numbers) >= 2:
-                    result = int(numbers[0]) - int(numbers[1])
-                    return f"The answer is {result}. My calculations are always precise!"
-            elif 'times' in text_lower or '*' in text:
-                numbers = re.findall(r'\d+', text)
-                if len(numbers) >= 2:
-                    result = int(numbers[0]) * int(numbers[1])
-                    return f"The answer is {result}. My calculations are always precise!"
-            elif 'divided' in text_lower or '/' in text:
-                numbers = re.findall(r'\d+', text)
-                if len(numbers) >= 2:
-                    if int(numbers[1]) != 0:
-                        result = int(numbers[0]) / int(numbers[1])
-                        return f"The answer is {result}. My calculations are always precise!"
-                    else:
-                        return "I can't divide by zero! That would cause a mathematical singularity!"
-            
-            # Fallback to simple math evaluation
-            math_text = re.sub(r'[^0-9+\-*/().\s]', '', text)
-            if any(op in math_text for op in ['+', '-', '*', '/', '(', ')']):
-                result = eval(math_text)
-                return f"The answer is {result}. My calculations are always precise!"
-                
-        except Exception as e:
-            return "I'm sorry, I couldn't calculate that. My math circuits might need recalibration."
-
-    if WEATHER_PAT.search(text):
-        return ("I'd love to tell you the weather, but I don't have access to weather data right now. "
-                "You could connect me to a weather API to make me even more helpful!")
-
-    if STATUS_PAT.search(text):
-        return ("I'm functioning perfectly! All systems are operational and ready to assist you. "
-                "My pie-throwing arm is calibrated and my friendliness circuits are at maximum!")
-
-    # Fallback responses with Neptr personality (only if OpenAI is not available)
+    # Fallback responses only if OpenAI is not available
     fallback_responses = [
-        "That's an interesting question! I'm still learning, but I'm happy to help with what I can.",
-        "I'm not sure about that, but I'm always eager to learn new things!",
-        "That's beyond my current programming, but I'm here for you in other ways!",
-        "I'm still developing my knowledge base, but I'm ready to assist with basic tasks!",
-        "That's a bit advanced for my circuits right now, but I'm happy to help with simpler things!"
+        "I'd love to help with that! My AI brain is currently offline, but I'm still here to chat!",
+        "That's a great question! My cloud connection is down right now, but I'm happy to keep you company!",
+        "I'm having trouble connecting to my AI brain, but I'm still your friendly robot companion!",
+        "My advanced circuits are temporarily offline, but I'm still here and ready to help however I can!",
+        "I'd normally give you a smart answer, but my AI connection is down. Still, I'm happy to chat!"
     ]
     return random.choice(fallback_responses)
 
