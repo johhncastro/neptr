@@ -15,6 +15,8 @@ def demo_conversation():
     print("🤖 NEPTR AI Assistant - Demo Mode")
     print("=" * 40)
     print("This demo shows Neptr's responses to various commands.")
+    print("Enhanced with GPT-4 Turbo for current information!")
+    print("Personality matches Neptr from Adventure Time!")
     print("You can also test voice output by setting AUDIO_DEMO = True below.")
     print()
     
@@ -24,7 +26,7 @@ def demo_conversation():
     # Demo commands
     demo_commands = [
         "what time is it",
-        "what's the date today",
+        "what's the date today", 
         "what's your name",
         "tell me a joke",
         "calculate 15 plus 27",
@@ -32,7 +34,14 @@ def demo_conversation():
         "how are you feeling",
         "what can you do",
         "who created you",
-        "do you like pie"
+        "do you like pie",
+        "what is the capital of France",
+        "how do I make a cake",
+        "explain quantum physics",
+        "tell me a story about a robot",
+        "who is the current president of the united states",
+        "tell me about your adventures with Finn",
+        "what's happening in the news today"
     ]
     
     for i, command in enumerate(demo_commands, 1):
