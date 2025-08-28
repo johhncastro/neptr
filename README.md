@@ -107,10 +107,38 @@ Edit `neptr.py` to customize:
 - **Personality**: Add more responses to the various response lists
 - **Commands**: Add new intent patterns and handlers
 
+## 🎤 Voice Options
+
+Neptr supports multiple TTS engines for different voice qualities:
+
+### OpenAI TTS (Default - High Quality)
+- **Included with your OpenAI API key**
+- **Voices**: alloy (deep/robotic), echo, fable, onyx, nova, shimmer
+- **Configure**: Edit `config.py` to change `OPENAI_TTS_VOICE`
+
+### Piper TTS (Local, Free)
+- **Runs locally without internet**
+- **Multiple voice models available**
+- **Configure**: Set `TTS_ENGINE = "piper"` in `config.py`
+
+### espeak (Fallback)
+- **Always works, basic quality**
+- **Configurable speed and pitch**
+- **Configure**: Set `TTS_ENGINE = "espeak"` in `config.py`
+
+### Testing Voices
+```bash
+# Test current voice
+python3 test_openai_tts.py
+
+# Test all voice options
+python3 test_voice.py
+```
+
 ## 🎮 Usage
 
 ### Basic Usage
-1. Run the assistant: `./start_neptr.sh`
+1. Run the assistant: `./run_neptr.sh`
 2. Say "Hello Neptr" to wake it up
 3. Speak your command clearly
 4. Listen to Neptr's response
