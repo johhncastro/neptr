@@ -34,6 +34,7 @@ A voice-controlled AI assistant inspired by Neptr from Adventure Time, designed 
 - Raspberry Pi 4 (2GB RAM minimum, 4GB recommended)
 - Microphone and speakers/headphones
 - Internet connection for initial setup
+- OpenAI API key (for advanced features)
 
 ### Installation
 
@@ -49,9 +50,28 @@ A voice-controlled AI assistant inspired by Neptr from Adventure Time, designed 
    ./setup.sh
    ```
 
-3. **Start NEPTR**
+3. **Set up your API key**
    ```bash
-   ./start_neptr.sh
+   # Copy the template
+   cp run_neptr_template.sh run_neptr.sh
+   
+   # Edit the file and add your OpenAI API key
+   nano run_neptr.sh
+   ```
+   
+   Replace `your-openai-api-key-here` with your actual OpenAI API key:
+   ```bash
+   export OPENAI_API_KEY="sk-your-actual-api-key-here"
+   ```
+
+4. **Make the script executable**
+   ```bash
+   chmod +x run_neptr.sh
+   ```
+
+5. **Start NEPTR**
+   ```bash
+   ./run_neptr.sh
    ```
 
 ### Manual Setup (Alternative)
@@ -84,11 +104,43 @@ If you prefer manual installation:
    rm vosk-model-small-en-us-0.15.zip
    ```
 
+5. **Set up API key**
+   ```bash
+   cp run_neptr_template.sh run_neptr.sh
+   nano run_neptr.sh  # Add your OpenAI API key
+   chmod +x run_neptr.sh
+   ```
+
+## 🔐 API Keys & Security
+
+### Getting an OpenAI API Key
+1. Go to [OpenAI Platform](https://platform.openai.com/)
+2. Sign up or log in
+3. Navigate to "API Keys" section
+4. Create a new API key
+5. Copy the key (starts with `sk-`)
+
+### Setting Up Your API Key
+The project includes a template file to safely store your API key:
+
+```bash
+# Copy the template
+cp run_neptr_template.sh run_neptr.sh
+
+# Edit with your API key
+nano run_neptr.sh
+```
+
+**Important Security Notes:**
+- The `run_neptr.sh` file is in `.gitignore` to prevent accidentally committing your API key
+- Never share your API key publicly
+- The template file (`run_neptr_template.sh`) is safe to commit as it contains no real keys
+
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-Set these in your shell or add to `~/.bashrc`:
+You can also set these in your shell or add to `~/.bashrc`:
 
 ```bash
 # For OpenAI integration (optional)
@@ -129,19 +181,26 @@ Neptr supports multiple TTS engines for different voice qualities:
 ### Testing Voices
 ```bash
 # Test current voice
-python3 test_openai_tts.py
+python3 tests/test_openai_tts.py
 
 # Test all voice options
-python3 test_voice.py
+python3 tests/test_voice.py
 ```
 
 ## 🎮 Usage
 
 ### Basic Usage
-1. Run the assistant: `./run_neptr.sh`
-2. Say "Hello Neptr" to wake it up
-3. Speak your command clearly
-4. Listen to Neptr's response
+1. **Set up your API key** (if not done already):
+   ```bash
+   cp run_neptr_template.sh run_neptr.sh
+   nano run_neptr.sh  # Add your OpenAI API key
+   chmod +x run_neptr.sh
+   ```
+
+2. **Run the assistant**: `./run_neptr.sh`
+3. **Say "Hello Neptr"** to wake it up
+4. **Speak your command** clearly
+5. **Listen to Neptr's response**
 
 ### Example Interactions
 
@@ -180,6 +239,12 @@ Neptr: "The answer is 42. My calculations are always precise!"
 - Speak clearly and at normal volume
 - Try different wake phrases: "Hey Neptr", "Hi Neptr", "Neptr"
 - Check microphone levels in system settings
+
+**OpenAI API not working**
+- Verify your API key is set in `run_neptr.sh`
+- Check that you have sufficient API credits
+- Ensure internet connection is working
+- Test with: `python3 tests/test_neptr.py`
 
 ### Performance Tips
 
