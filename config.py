@@ -20,6 +20,11 @@ VOICE_SPEED = 175                   # Speech speed (words per minute)
 VOICE_PITCH = 35                    # Voice pitch (0-99, lower = deeper)
 VOICE_GAP = 5                       # Word gap for robotic speech
 
+# TTS Engine settings
+TTS_ENGINE = "openai"               # "espeak", "openai", "piper"
+OPENAI_TTS_MODEL = "tts-1"          # OpenAI TTS model
+OPENAI_TTS_VOICE = "alloy"          # "alloy", "echo", "fable", "onyx", "nova", "shimmer"
+
 # ============================================================================
 # WAKE WORD SETTINGS
 # ============================================================================
@@ -110,8 +115,8 @@ NEPTR_APOLOGIES = [
 # Enable/disable features
 AUDIO_FEEDBACK = True               # Enable/disable audio feedback
 VISUAL_FEEDBACK = True              # Enable/disable visual feedback
-OPENAI_INTEGRATION = True           # Enable/disable OpenAI integration
-MATH_CALCULATIONS = True            # Enable/disable math calculations
+OPENAI_INTEGRATION = True           # Enable/disable OpenAI integration (primary response method)
+MATH_CALCULATIONS = False           # Disabled - now handled by OpenAI
 WEATHER_FEATURES = False            # Enable/disable weather features
 
 # ============================================================================
@@ -119,9 +124,10 @@ WEATHER_FEATURES = False            # Enable/disable weather features
 # ============================================================================
 
 # OpenAI settings (optional)
-OPENAI_MODEL = "gpt-4o-mini"        # Model to use for responses
-OPENAI_MAX_TOKENS = 150             # Maximum response length
-OPENAI_TEMPERATURE = 0.7            # Response creativity (0.0-1.0)
+OPENAI_MODEL = "gpt-4o"             # Model to use for responses (more current info)
+OPENAI_MAX_TOKENS = 300             # Maximum response length
+OPENAI_TEMPERATURE = 0.8            # Response creativity (0.0-1.0) - more creative
+API_RATE_LIMIT_SECONDS = 1.0        # Minimum seconds between API calls
 
 # Weather API settings (optional)
 WEATHER_API_KEY = None              # Set your weather API key here

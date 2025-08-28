@@ -80,9 +80,7 @@ def tts(text: str, voice_speed=None, voice_pitch=None):
         voice_pitch = VOICE_PITCH
     
     # Choose TTS engine based on configuration
-    if TTS_ENGINE == "elevenlabs" and ELEVENLABS_API_KEY:
-        tts_elevenlabs(text)
-    elif TTS_ENGINE == "openai" and os.getenv("OPENAI_API_KEY"):
+    if TTS_ENGINE == "openai" and os.getenv("OPENAI_API_KEY"):
         tts_openai(text)
     elif TTS_ENGINE == "piper":
         tts_piper(text, voice_speed, voice_pitch)
@@ -90,29 +88,7 @@ def tts(text: str, voice_speed=None, voice_pitch=None):
         # Fallback to espeak
         tts_espeak(text, voice_speed, voice_pitch)
 
-def tts_elevenlabs(text: str):
-    """Use ElevenLabs for high-quality voice synthesis"""
-    try:
-        from elevenlabs import generate, play, set_api_key
-        
-        set_api_key(ELEVENLABS_API_KEY)
-        
-        # Generate audio with Neptr-like voice
-        audio = generate(
-            text=text,
-            voice=ELEVENLABS_VOICE_ID,
-            model="eleven_monolingual_v1"
-        )
-        
-        # Play the audio
-        play(audio)
-        
-    except ImportError:
-        print_neptr_status("ElevenLabs not installed, falling back to espeak")
-        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
-    except Exception as e:
-        print_neptr_status(f"ElevenLabs error: {e}, falling back to espeak")
-        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
+
 
 def tts_openai(text: str):
     """Use OpenAI TTS for high-quality voice synthesis"""
@@ -130,7 +106,7 @@ def tts_openai(text: str):
         payload = {
             "model": OPENAI_TTS_MODEL,
             "input": text,
-            "voice": "alloy"  # Deep, robotic voice
+            "voice": OPENAI_TTS_VOICE  # Use configurable voice
         }
         
         response = requests.post(
