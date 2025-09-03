@@ -1,0 +1,28 @@
+[Unit]
+Description=NEPTR AI Assistant
+After=network.target sound.target
+Wants=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/home/%i/PycharmProjects/neptr
+ExecStart=/home/%i/PycharmProjects/neptr/start_neptr.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Raspberry Pi specific optimizations
+Nice=10
+IOSchedulingClass=2
+IOSchedulingPriority=4
+
+# Environment variables
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+[Install]
+WantedBy=multi-user.target
