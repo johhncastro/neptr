@@ -36,21 +36,36 @@ A voice-controlled AI assistant inspired by Neptr from Adventure Time, designed 
 - Internet connection for initial setup
 - OpenAI API key (for advanced features)
 
-### Installation
+### One-Command Installation
 
-1. **Clone or download this repository**
+**For Raspberry Pi (Recommended):**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/johhncastro/neptr/main/install_neptr.sh | bash
+```
+
+This single command will:
+- ✅ Download the complete NEPTR repository
+- ✅ Install all system dependencies
+- ✅ Set up Python virtual environment
+- ✅ Download speech recognition model
+- ✅ Configure audio permissions
+- ✅ Create helper scripts and desktop shortcut
+- ✅ Optimize for Bookworm Lite OS
+
+### After Installation
+
+1. **Navigate to the installation directory**
    ```bash
-   git clone <repository-url>
-   cd neptr
+   cd ~/neptr
    ```
 
-2. **Run the setup script**
+2. **Test your setup**
    ```bash
-   chmod +x setup.sh
-   ./setup.sh
+   ./test_neptr.sh
    ```
 
-3. **Set up your API key**
+3. **Set up your API key (optional)**
    ```bash
    # Copy the template
    cp run_neptr_template.sh run_neptr.sh
@@ -71,45 +86,54 @@ A voice-controlled AI assistant inspired by Neptr from Adventure Time, designed 
 
 5. **Start NEPTR**
    ```bash
-   ./run_neptr.sh
+   ./start_neptr.sh
    ```
 
-### Manual Setup (Alternative)
+### Manual Installation (Advanced Users)
 
-If you prefer manual installation:
+If you prefer to install manually or are not using a Raspberry Pi:
 
-1. **Install system dependencies**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/johhncastro/neptr.git
+   cd neptr
+   ```
+
+2. **Install system dependencies**
    ```bash
    sudo apt update
-   sudo apt install python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio
+   sudo apt install python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio python3-dev build-essential
    ```
 
-2. **Create virtual environment**
+3. **Create virtual environment**
    ```bash
    python3 -m venv neptr_env
    source neptr_env/bin/activate
    ```
 
-3. **Install Python packages**
+4. **Install Python packages**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Download speech model**
+5. **Download speech model**
    ```bash
    mkdir -p ~/models
    cd ~/models
    wget https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
    unzip vosk-model-small-en-us-0.15.zip
    rm vosk-model-small-en-us-0.15.zip
+   cd ~/neptr
    ```
 
-5. **Set up API key**
+6. **Set up API key**
    ```bash
    cp run_neptr_template.sh run_neptr.sh
    nano run_neptr.sh  # Add your OpenAI API key
    chmod +x run_neptr.sh
    ```
+
+**Note**: The one-command installer is recommended as it handles all dependencies and optimizations automatically.
 
 ## 🔐 API Keys & Security
 
@@ -190,17 +214,22 @@ python3 tests/test_voice.py
 ## 🎮 Usage
 
 ### Basic Usage
-1. **Set up your API key** (if not done already):
+1. **Navigate to NEPTR directory**:
+   ```bash
+   cd ~/neptr
+   ```
+
+2. **Set up your API key** (if not done already):
    ```bash
    cp run_neptr_template.sh run_neptr.sh
    nano run_neptr.sh  # Add your OpenAI API key
    chmod +x run_neptr.sh
    ```
 
-2. **Run the assistant**: `./run_neptr.sh`
-3. **Say "Hello Neptr"** to wake it up
-4. **Speak your command** clearly
-5. **Listen to Neptr's response**
+3. **Run the assistant**: `./start_neptr.sh`
+4. **Say "Hello Neptr"** to wake it up
+5. **Speak your command** clearly
+6. **Listen to Neptr's response**
 
 ### Example Interactions
 
@@ -223,16 +252,17 @@ Neptr: "The answer is 42. My calculations are always precise!"
 ### Common Issues
 
 **"Vosk model not found"**
-- Run the setup script again
-- Manually download the model from https://alphacephei.com/vosk/models
+- Run the installer again: `curl -sSL https://raw.githubusercontent.com/johhncastro/neptr/main/install_neptr.sh | bash`
+- Or manually download the model from https://alphacephei.com/vosk/models
 
 **"No module named 'sounddevice'"**
+- Navigate to NEPTR directory: `cd ~/neptr`
 - Activate the virtual environment: `source neptr_env/bin/activate`
 - Reinstall dependencies: `pip install -r requirements.txt`
 
 **Audio not working**
-- Check microphone permissions: `sudo usermod -a -G audio $USER`
-- Reboot: `sudo reboot`
+- Check status: `cd ~/neptr && ./neptr_status.sh`
+- Reboot to activate permissions: `sudo reboot`
 - Test audio: `arecord -d 5 test.wav && aplay test.wav`
 
 **Wake word not detected**
@@ -241,10 +271,11 @@ Neptr: "The answer is 42. My calculations are always precise!"
 - Check microphone levels in system settings
 
 **OpenAI API not working**
+- Navigate to NEPTR directory: `cd ~/neptr`
 - Verify your API key is set in `run_neptr.sh`
 - Check that you have sufficient API credits
 - Ensure internet connection is working
-- Test with: `python3 tests/test_neptr.py`
+- Test with: `./test_neptr.sh`
 
 ### Performance Tips
 

@@ -31,30 +31,46 @@ chmod +x install_neptr.sh
 - **Internet connection** for initial setup
 - **Optional**: OpenAI API key for advanced features
 
+### 🖥️ Supported Operating Systems
+
+- **Raspberry Pi OS Bookworm Lite** (Recommended)
+- **Raspberry Pi OS Bookworm Desktop**
+- **Ubuntu 22.04+ for Raspberry Pi**
+- **Other Debian-based distributions**
+
+The installer is specifically optimized for **Bookworm Lite OS** and will detect your system automatically.
+
 ## ⚡ What Happens During Installation
 
 The installer automatically:
-- ✅ Updates your Pi's system packages
-- ✅ Installs all required dependencies
-- ✅ Sets up Python virtual environment
-- ✅ Downloads speech recognition model
-- ✅ Configures audio permissions
-- ✅ Creates easy-to-use startup scripts
-- ✅ Adds desktop shortcut
+- ✅ **Downloads NEPTR repository** from GitHub to `~/neptr`
+- ✅ **Updates your Pi's system packages** for optimal performance
+- ✅ **Installs all required dependencies** (Python, audio, build tools)
+- ✅ **Sets up Python virtual environment** with all packages
+- ✅ **Downloads speech recognition model** (Vosk)
+- ✅ **Configures audio permissions** for microphone access
+- ✅ **Creates easy-to-use startup scripts** (`start_neptr.sh`, `test_neptr.sh`, `neptr_status.sh`)
+- ✅ **Adds desktop shortcut** for easy access
+- ✅ **Optimizes for Bookworm Lite OS** with specific configurations
 
 ## 🎯 After Installation
 
-### 1. Test Your Setup
+### 1. Navigate to NEPTR Directory
+```bash
+cd ~/neptr
+```
+
+### 2. Test Your Setup
 ```bash
 ./test_neptr.sh
 ```
 
-### 2. Start NEPTR
+### 3. Start NEPTR
 ```bash
 ./start_neptr.sh
 ```
 
-### 3. Check Status
+### 4. Check Status
 ```bash
 ./neptr_status.sh
 ```
@@ -64,6 +80,9 @@ The installer automatically:
 For advanced AI conversations:
 
 ```bash
+# Navigate to NEPTR directory
+cd ~/neptr
+
 # Copy the template
 cp run_neptr_template.sh run_neptr.sh
 
@@ -84,6 +103,9 @@ chmod +x run_neptr.sh
 
 ### Audio Not Working?
 ```bash
+# Navigate to NEPTR directory
+cd ~/neptr
+
 # Check status
 ./neptr_status.sh
 
@@ -106,6 +128,12 @@ sudo reboot
 Keep NEPTR updated:
 
 ```bash
+# Navigate to NEPTR directory
+cd ~/neptr
+
+# Update NEPTR code from GitHub
+git pull
+
 # Update system and packages
 sudo apt update && sudo apt upgrade
 
@@ -120,6 +148,9 @@ deactivate
 Want NEPTR to start automatically when you turn on your Pi?
 
 ```bash
+# Navigate to NEPTR directory
+cd ~/neptr
+
 # Enable the service
 sudo cp neptr.service /etc/systemd/system/
 sudo systemctl enable neptr.service
@@ -131,11 +162,19 @@ sudo systemctl status neptr.service
 
 ## 🎨 Customization
 
-Edit `neptr_config.py` to customize:
+Edit `config.py` to customize:
 - Voice speed and pitch
 - Wake phrases
 - Performance settings
 - Hardware features
+
+```bash
+# Navigate to NEPTR directory
+cd ~/neptr
+
+# Edit configuration
+nano config.py
+```
 
 ## 📱 Desktop Shortcut
 
@@ -144,8 +183,10 @@ A desktop icon was created automatically. Double-click to start NEPTR!
 ## 🆘 Need Help?
 
 - Check the main README.md for detailed information
+- Navigate to NEPTR directory: `cd ~/neptr`
 - Run `./neptr_status.sh` to diagnose issues
 - Ensure your Pi has enough free space (at least 2GB)
+- For Bookworm Lite OS issues, check system logs: `journalctl -u neptr.service`
 
 ---
 

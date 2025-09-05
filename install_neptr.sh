@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🤖 NEPTR One-Click Raspberry Pi Installer"
-echo "=========================================="
+echo "🤖 NEPTR Complete Raspberry Pi Installer"
+echo "========================================="
 echo ""
 
 # Check if we're on a Pi
@@ -16,6 +16,15 @@ if ! grep -q "Raspberry Pi" /proc/cpuinfo 2>/dev/null; then
     fi
 fi
 
+# Check OS version
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    echo "🖥️  Detected OS: $PRETTY_NAME"
+    if [[ "$VERSION_ID" == "12" ]] && [[ "$ID" == "debian" ]]; then
+        echo "✅ Optimized for Bookworm Lite OS!"
+    fi
+fi
+
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
     echo "❌ Please don't run this as root (sudo)."
@@ -23,9 +32,29 @@ if [[ $EUID -eq 0 ]]; then
     exit 1
 fi
 
+# Set installation directory
+INSTALL_DIR="$HOME/neptr"
+REPO_URL="https://github.com/johhncastro/neptr.git"
+
 echo "🚀 Installing NEPTR on your Raspberry Pi..."
+echo "   This will download the complete NEPTR repository and set everything up!"
+echo "   Installation directory: $INSTALL_DIR"
 echo "   This will take a few minutes. Grab a snack! 🍕"
 echo ""
+
+# Check if neptr directory already exists
+if [ -d "$INSTALL_DIR" ]; then
+    echo "⚠️  NEPTR directory already exists at $INSTALL_DIR"
+    read -p "Do you want to remove it and reinstall? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "🗑️  Removing existing installation..."
+        rm -rf "$INSTALL_DIR"
+    else
+        echo "❌ Installation cancelled."
+        exit 1
+    fi
+fi
 
 # Function to show progress
 show_progress() {
@@ -33,13 +62,32 @@ show_progress() {
     echo "📋 $message"
 }
 
+# Download NEPTR repository
+show_progress "Downloading NEPTR repository..."
+git clone "$REPO_URL" "$INSTALL_DIR"
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to download NEPTR repository!"
+    echo "   Please check your internet connection and try again."
+    exit 1
+fi
+
+# Change to installation directory
+cd "$INSTALL_DIR"
+
 # Update system
 show_progress "Updating system packages..."
 sudo apt update -qq && sudo apt upgrade -y -qq
 
-# Install all dependencies in one go
+# Install all dependencies in one go (optimized for Bookworm Lite)
 show_progress "Installing system dependencies..."
-sudo apt install -y -qq python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio git wget unzip python3-gpiozero
+sudo apt install -y -qq python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio git wget unzip python3-gpiozero python3-dev build-essential
+
+# Bookworm Lite specific optimizations
+show_progress "Optimizing for Bookworm Lite OS..."
+# Ensure audio group exists
+sudo groupadd -f audio
+# Add user to audio group
+sudo usermod -a -G audio $USER
 
 # Create virtual environment
 show_progress "Setting up Python environment..."
@@ -62,9 +110,7 @@ if [ ! -d vosk-model-small-en-us-0.15 ]; then
 fi
 cd - > /dev/null
 
-# Set up audio permissions
-show_progress "Setting up audio permissions..."
-sudo usermod -a -G audio $USER
+# Audio permissions already set up above
 
 # Create all the helper scripts
 show_progress "Creating helper scripts..."
@@ -129,21 +175,31 @@ Version=1.0
 Type=Application
 Name=NEPTR AI Assistant
 Comment=Voice-controlled AI assistant for Raspberry Pi
-Exec=$(pwd)/start_neptr.sh
+Exec=$INSTALL_DIR/start_neptr.sh
 Icon=terminal
 Terminal=true
 Categories=Utility;AudioVideo;
 EOF
 
+# Move desktop shortcut to user's desktop
+if [ -d "$HOME/Desktop" ]; then
+    mv NEPTR.desktop "$HOME/Desktop/"
+    echo "📱 Desktop shortcut created!"
+fi
+
 echo ""
 echo "🎉 Installation complete! NEPTR is ready to use!"
 echo ""
+echo "📁 NEPTR installed in: $INSTALL_DIR"
+echo ""
 echo "🚀 Quick Start:"
+echo "  cd $INSTALL_DIR"
 echo "  1. Test: ./test_neptr.sh"
 echo "  2. Start: ./start_neptr.sh"
 echo "  3. Status: ./neptr_status.sh"
 echo ""
 echo "🔑 Optional OpenAI Setup:"
+echo "  cd $INSTALL_DIR"
 echo "  cp run_neptr_template.sh run_neptr.sh"
 echo "  nano run_neptr.sh  # Add your API key"
 echo "  chmod +x run_neptr.sh"
@@ -152,3 +208,6 @@ echo "🤖 Say 'Hello Neptr' to wake me up!"
 echo ""
 echo "💡 Tip: Reboot your Pi to ensure all permissions are active!"
 echo "   sudo reboot"
+echo ""
+echo "🔄 To update NEPTR in the future:"
+echo "  cd $INSTALL_DIR && git pull"
