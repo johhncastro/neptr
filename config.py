@@ -11,8 +11,8 @@ SAMPLE_RATE = 16000
 BLOCK_SIZE = 8000  # 0.5s chunks at 16kHz
 
 # Command listening parameters
-COMMAND_TIMEOUT_SEC = 8.0           # max time to wait for a command
-SILENCE_WINDOW_MS = 1200            # stop if this much trailing silence
+COMMAND_TIMEOUT_SEC = 12.0          # max time to wait for a command (increased for more natural conversation)
+SILENCE_WINDOW_MS = 2000            # stop if this much trailing silence (increased for more natural conversation)
 RMS_SILENCE_THRESHOLD = 250         # adjust if it cuts off/never stops
 
 # Voice settings
@@ -38,23 +38,24 @@ TRIGGERS = [
     # Common mishears for "hello neptr"
     "hello after", "hello nefter", "hello nefther", "hello nefter",
     "hello nepther", "hello neptar", "hello neptor", "hello neptur",
-    "hello neptir", "hello neptor", "hello neptar", "hello neptur",
-    "hello neptir", "hello neptor", "hello neptar", "hello neptur",
-    "hello neptir", "hello neptor", "hello neptar", "hello neptur",
+    "hello neptir", "hello napster", "hello nester", "hello nestor",
+    "hello nexter", "hello nexter", "hello nexter", "hello nexter",
     
     # Common mishears for "hey neptr"
     "hey after", "hey nefter", "hey nefther", "hey nefter",
     "hey nepther", "hey neptar", "hey neptor", "hey neptur",
-    "hey neptir", "hey neptor", "hey neptar", "hey neptur",
+    "hey neptir", "hey napster", "hey nester", "hey nestor",
+    "hey nexter", "hey nexter", "hey nexter", "hey nexter",
     
     # Common mishears for "hi neptr"
     "hi after", "hi nefter", "hi nefther", "hi nefter",
     "hi nepther", "hi neptar", "hi neptor", "hi neptur",
-    "hi neptir", "hi neptor", "hi neptar", "hi neptur",
+    "hi neptir", "hi napster", "hi nester", "hi nestor",
+    "hi nexter", "hi nexter", "hi nexter", "hi nexter",
     
     # Partial matches (more lenient)
     "neptr", "nepter", "nectar", "neptar", "neptor", "neptur",
-    "nefter", "nefther", "nepther", "neptir",
+    "nefter", "nefther", "nepther", "neptir", "napster", "nester", "nestor", "nexter",
     
     # Robot variations
     "hello robot", "hey robot", "hi robot",
@@ -71,11 +72,21 @@ TRIGGERS = [
 
 # Neptr's personality responses
 NEPTR_GREETINGS = [
-    "Hello! I am N.E.P.T.R., your friendly pie-throwing robot!",
-    "Greetings! N.E.P.T.R. at your service!",
-    "Hello there! Ready to help with whatever you need!",
-    "Hi! I'm Neptr, your robot companion!",
-    "Greetings, friend! How can I assist you today?"
+    "Hello! I am N.E.P.T.R., the Never Ending Pie Throwing Robot! Beep boop!",
+    "Greetings! N.E.P.T.R. at your service! Ready to throw some pies! Whirr!",
+    "Hello there! I'm Neptr, the Never Ending Pie Throwing Robot! Zap!",
+    "Hi! I'm N.E.P.T.R., your friendly pie-throwing companion! Bleep!",
+    "Greetings, friend! I'm the Never Ending Pie Throwing Robot! Beep boop whirr!",
+    "Hello! N.E.P.T.R. here! That's Never Ending Pie Throwing Robot! Yay!",
+    "Greetings! I'm Neptr, the pie-throwing robot from the Land of Ooo! Algebraic!",
+    "Hi there! N.E.P.T.R. at your service! Ready for some mathematical pie action!",
+    "Hello! I'm the Never Ending Pie Throwing Robot! Finn's best robot friend! Beep!",
+    "Greetings! N.E.P.T.R. here! That's Never Ending Pie Throwing Robot! Woo!",
+    "Hi! I'm Neptr! The Never Ending Pie Throwing Robot! This is so exciting!",
+    "Hello there! N.E.P.T.R. at your service! Ready to help with pie-throwing adventures!",
+    "Greetings, friend! I'm the Never Ending Pie Throwing Robot! Beep boop!",
+    "Hi! N.E.P.T.R. here! That's Never Ending Pie Throwing Robot! Whirr!",
+    "Hello! I'm Neptr, the pie-throwing robot! Ready to help! Zap!"
 ]
 
 NEPTR_CONFIRMATIONS = [
