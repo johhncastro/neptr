@@ -149,7 +149,7 @@ def test_openai_integration():
         
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "gpt-5",
             "messages": [{"role": "user", "content": "Hello"}],
             "max_tokens": 10
         }

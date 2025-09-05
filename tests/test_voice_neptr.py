@@ -55,7 +55,7 @@ def test_api_connection():
         
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "gpt-5",
             "messages": [{"role": "user", "content": "Hello Neptr"}],
             "max_tokens": 50
         }

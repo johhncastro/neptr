@@ -40,7 +40,7 @@ You can answer any question and help with any task, just like ChatGPT but with N
 
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {
-            "model": "gpt-4o-mini",
+            "model": "gpt-5",
             "messages": [
                 {
                     "role": "system", 
