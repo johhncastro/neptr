@@ -62,6 +62,21 @@ show_progress() {
     echo "📋 $message"
 }
 
+# Update system and install essential dependencies first
+show_progress "Updating system packages..."
+sudo apt update -qq && sudo apt upgrade -y -qq
+
+# Install essential dependencies including git (required for repository download)
+show_progress "Installing essential dependencies (including git)..."
+sudo apt install -y -qq git wget unzip
+
+# Verify git is working
+if ! command -v git &> /dev/null; then
+    echo "❌ Git installation failed!"
+    echo "   Please check your internet connection and try again."
+    exit 1
+fi
+
 # Download NEPTR repository
 show_progress "Downloading NEPTR repository..."
 git clone "$REPO_URL" "$INSTALL_DIR"
@@ -74,13 +89,9 @@ fi
 # Change to installation directory
 cd "$INSTALL_DIR"
 
-# Update system
-show_progress "Updating system packages..."
-sudo apt update -qq && sudo apt upgrade -y -qq
-
-# Install all dependencies in one go (optimized for Bookworm Lite)
-show_progress "Installing system dependencies..."
-sudo apt install -y -qq python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio git wget unzip python3-gpiozero python3-dev build-essential
+# Install remaining dependencies (optimized for Bookworm Lite)
+show_progress "Installing remaining system dependencies..."
+sudo apt install -y -qq python3-pip python3-venv espeak-ng portaudio19-dev python3-pyaudio python3-gpiozero python3-dev build-essential
 
 # Bookworm Lite specific optimizations
 show_progress "Optimizing for Bookworm Lite OS..."
