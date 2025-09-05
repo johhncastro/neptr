@@ -7,14 +7,14 @@
 Just copy and paste this single command into your Pi's terminal:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yourusername/neptr/main/install_neptr.sh | bash
+curl -sSL https://raw.githubusercontent.com/johhncastro/neptr/main/install_neptr.sh | bash
 ```
 
 **Or download and run manually:**
 
 ```bash
 # Download the installer
-wget https://raw.githubusercontent.com/yourusername/neptr/main/install_neptr.sh
+wget https://raw.githubusercontent.com/johhncastro/neptr/main/install_neptr.sh
 
 # Make it executable
 chmod +x install_neptr.sh
