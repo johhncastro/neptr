@@ -51,7 +51,7 @@ You can answer any question and help with any task, just like ChatGPT but with N
                     "content": "what is your name"
                 }
             ],
-            "max_completion_tokens": 250
+            "max_completion_tokens": 500
         }
         
         print("🔄 Making API call...")

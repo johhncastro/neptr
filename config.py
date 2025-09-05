@@ -123,7 +123,7 @@ WEATHER_FEATURES = False            # Enable/disable weather features
 
 # OpenAI settings (optional)
 OPENAI_MODEL = "gpt-5-nano"        # Model to use for responses (latest nano version)
-OPENAI_MAX_TOKENS = 300             # Maximum response length
+OPENAI_MAX_TOKENS = 500             # Maximum response length (increased for GPT-5 nano)
 OPENAI_TEMPERATURE = 0.8            # Response creativity (0.0-1.0) - more creative
 API_RATE_LIMIT_SECONDS = 1.0        # Minimum seconds between API calls
 

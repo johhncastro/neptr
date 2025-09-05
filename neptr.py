@@ -201,9 +201,14 @@ Remember: You're from the Land of Ooo, you love Finn, and you're always ready to
             r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=10)
             r.raise_for_status()
             data = r.json()
+            print_neptr_status(f"API Response: {data}")  # Debug output
             if "choices" in data and data["choices"]:
                 last_api_call_time = time.time()  # Update timestamp for rate limiting
-                return data["choices"][0]["message"]["content"].strip()
+                response_content = data["choices"][0]["message"]["content"].strip()
+                print_neptr_status(f"Response content: '{response_content}'")  # Debug output
+                return response_content
+            else:
+                print_neptr_status("No choices in API response")  # Debug output
         except requests.exceptions.RequestException as e:
             print_neptr_status(f"OpenAI API request error: {e}")
             # Continue to fallback responses below
