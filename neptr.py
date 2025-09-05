@@ -196,8 +196,7 @@ Remember: You're from the Land of Ooo, you love Finn, and you're always ready to
                         "content": command_text
                     }
                 ],
-                "max_tokens": OPENAI_MAX_TOKENS,
-                "temperature": OPENAI_TEMPERATURE
+                "max_completion_tokens": OPENAI_MAX_TOKENS
             }
             r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=10)
             r.raise_for_status()

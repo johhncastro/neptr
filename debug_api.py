@@ -40,7 +40,7 @@ You can answer any question and help with any task, just like ChatGPT but with N
 
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {
-            "model": "gpt-5",
+            "model": "gpt-5-nano",
             "messages": [
                 {
                     "role": "system", 
@@ -51,8 +51,7 @@ You can answer any question and help with any task, just like ChatGPT but with N
                     "content": "what is your name"
                 }
             ],
-            "max_tokens": 250,
-            "temperature": 0.7
+            "max_completion_tokens": 250
         }
         
         print("🔄 Making API call...")
