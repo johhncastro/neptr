@@ -69,7 +69,7 @@ def callback(indata, frames, time_info, status):
 USE_ESPEAK = shutil.which("espeak-ng") is not None
 
 def tts(text: str, voice_speed=None, voice_pitch=None):
-    """Text-to-speech with Neptr's voice characteristics"""
+    """Text-to-speech with Neptr's voice characteristics using espeak"""
     if not text or not AUDIO_FEEDBACK:
         return
     
@@ -79,84 +79,11 @@ def tts(text: str, voice_speed=None, voice_pitch=None):
     if voice_pitch is None:
         voice_pitch = VOICE_PITCH
     
-    # Choose TTS engine based on configuration
-    if TTS_ENGINE == "openai" and os.getenv("OPENAI_API_KEY"):
-        tts_openai(text)
-    elif TTS_ENGINE == "piper":
-        tts_piper(text, voice_speed, voice_pitch)
-    else:
-        # Fallback to espeak
-        tts_espeak(text, voice_speed, voice_pitch)
-
-
-
-def tts_openai(text: str):
-    """Use OpenAI TTS for high-quality voice synthesis"""
-    try:
-        import requests
-        import tempfile
-        import os
-        
-        api_key = os.getenv("OPENAI_API_KEY")
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": OPENAI_TTS_MODEL,
-            "input": text,
-            "voice": OPENAI_TTS_VOICE  # Use configurable voice
-        }
-        
-        response = requests.post(
-            "https://api.openai.com/v1/audio/speech",
-            headers=headers,
-            json=payload
-        )
-        
-        if response.status_code == 200:
-            # Save to temporary file and play
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-                f.write(response.content)
-                temp_file = f.name
-            
-            # Play the audio
-            subprocess.run(["afplay", temp_file], check=False)
-            
-            # Clean up
-            os.unlink(temp_file)
-        else:
-            print_neptr_status(f"OpenAI TTS error: {response.status_code}")
-            tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
-            
-    except Exception as e:
-        print_neptr_status(f"OpenAI TTS error: {e}, falling back to espeak")
-        tts_espeak(text, VOICE_SPEED, VOICE_PITCH)
-
-def tts_piper(text: str, voice_speed: int, voice_pitch: int):
-    """Use Piper TTS for local, high-quality voice synthesis"""
-    try:
-        # Piper command (if installed)
-        subprocess.run([
-            "piper", 
-            "--model", "en_US-amy-low.onnx",
-            "--output_file", "/tmp/neptr_speech.wav",
-            "--output_raw"
-        ], input=text.encode(), check=False)
-        
-        # Play the generated audio
-        subprocess.run(["afplay", "/tmp/neptr_speech.wav"], check=False)
-        
-    except FileNotFoundError:
-        print_neptr_status("Piper not installed, falling back to espeak")
-        tts_espeak(text, voice_speed, voice_pitch)
-    except Exception as e:
-        print_neptr_status(f"Piper error: {e}, falling back to espeak")
-        tts_espeak(text, voice_speed, voice_pitch)
+    # Use espeak for TTS
+    tts_espeak(text, voice_speed, voice_pitch)
 
 def tts_espeak(text: str, voice_speed: int, voice_pitch: int):
-    """Fallback to espeak with robot-like characteristics"""
+    """Text-to-speech using espeak with robot-like characteristics"""
     if USE_ESPEAK:
         # Slightly robotic voice with pauses
         subprocess.run([

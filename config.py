@@ -21,9 +21,7 @@ VOICE_PITCH = 35                    # Voice pitch (0-99, lower = deeper)
 VOICE_GAP = 5                       # Word gap for robotic speech
 
 # TTS Engine settings
-TTS_ENGINE = "openai"               # "espeak", "openai", "piper"
-OPENAI_TTS_MODEL = "tts-1"          # OpenAI TTS model
-OPENAI_TTS_VOICE = "alloy"          # "alloy", "echo", "fable", "onyx", "nova", "shimmer"
+TTS_ENGINE = "espeak"               # "espeak" (OpenAI TTS removed)
 
 # ============================================================================
 # WAKE WORD SETTINGS

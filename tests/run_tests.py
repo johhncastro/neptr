@@ -28,8 +28,8 @@ def main():
     # Available tests
     tests = [
         ("test_neptr.py", "System health check"),
-        ("test_openai_tts.py", "OpenAI TTS test"),
-        ("test_voice.py", "All TTS engines test"),
+        ("test_espeak_tts.py", "espeak TTS test"),
+        ("test_voice.py", "Voice settings test"),
         ("test_wake_words.py", "Wake word detection test"),
         ("test_voice_neptr.py", "Voice assistant simulation")
     ]

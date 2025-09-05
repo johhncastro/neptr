@@ -12,16 +12,15 @@ This folder contains all the test files for the NEPTR AI Assistant.
 - Configuration checks
 - OpenAI API connectivity
 
-### `test_openai_tts.py`
-**OpenAI TTS test** - Simple test of the current TTS configuration:
-- Tests the configured OpenAI TTS voice
+### `test_espeak_tts.py`
+**espeak TTS test** - Simple test of the current TTS configuration:
+- Tests the configured espeak voice
 - Quick verification that TTS is working
 
 ### `test_voice.py`
-**All TTS engines test** - Test different TTS options:
-- OpenAI TTS voices
-- Piper TTS (if installed)
-- espeak fallback
+**Voice settings test** - Test different voice options:
+- Different speech speeds
+- Different voice pitches
 - Interactive voice testing
 
 ### `test_wake_words.py`
@@ -55,7 +54,7 @@ python3 tests/run_tests.py
 python3 tests/test_neptr.py
 
 # TTS test
-python3 tests/test_openai_tts.py
+python3 tests/test_espeak_tts.py
 
 # Voice options test
 python3 tests/test_voice.py
