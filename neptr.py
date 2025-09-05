@@ -79,8 +79,18 @@ def tts(text: str, voice_speed=None, voice_pitch=None):
     if voice_pitch is None:
         voice_pitch = VOICE_PITCH
     
+    # Pause listening while speaking to prevent self-hearing
+    global is_listening
+    was_listening = is_listening
+    is_listening = False
+    print_neptr_status("🔇 Listening paused while speaking...")
+    
     # Use espeak for TTS
     tts_espeak(text, voice_speed, voice_pitch)
+    
+    # Resume listening after speaking
+    is_listening = was_listening
+    print_neptr_status("🎤 Listening resumed")
 
 def tts_espeak(text: str, voice_speed: int, voice_pitch: int):
     """Text-to-speech using espeak with robot-like characteristics"""
@@ -196,19 +206,15 @@ Remember: You're from the Land of Ooo, you love Finn, and you're always ready to
                         "content": command_text
                     }
                 ],
-                "max_completion_tokens": OPENAI_MAX_TOKENS
+                "max_tokens": OPENAI_MAX_TOKENS,
+                "temperature": OPENAI_TEMPERATURE
             }
             r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=10)
             r.raise_for_status()
             data = r.json()
-            print_neptr_status(f"API Response: {data}")  # Debug output
             if "choices" in data and data["choices"]:
                 last_api_call_time = time.time()  # Update timestamp for rate limiting
-                response_content = data["choices"][0]["message"]["content"].strip()
-                print_neptr_status(f"Response content: '{response_content}'")  # Debug output
-                return response_content
-            else:
-                print_neptr_status("No choices in API response")  # Debug output
+                return data["choices"][0]["message"]["content"].strip()
         except requests.exceptions.RequestException as e:
             print_neptr_status(f"OpenAI API request error: {e}")
             # Continue to fallback responses below
@@ -305,12 +311,15 @@ def listen_for_command(timeout_sec=COMMAND_TIMEOUT_SEC) -> str:
 # Main loop with improved feedback
 # -----------------------------
 def main():
-    global should_exit
+    global should_exit, is_listening
     
     print_neptr_status("Initializing...")
     print_neptr_status("NEPTR is now listening! Say 'hello neptr' to wake me up!")
     print_neptr_status("Press Ctrl+C to exit")
     print()
+    
+    # Start listening
+    is_listening = True
 
     with sd.RawInputStream(samplerate=SAMPLE_RATE, blocksize=BLOCK_SIZE,
                            dtype='int16', channels=1, callback=callback):
@@ -318,7 +327,8 @@ def main():
             try:
                 data = audio_q.get(timeout=1.0)  # Add timeout to allow for graceful exit
                 
-                if wake_rec.AcceptWaveform(data):
+                # Only process audio if we're listening (not speaking)
+                if is_listening and wake_rec.AcceptWaveform(data):
                     res = json.loads(wake_rec.Result())
                     transcript = res.get("text", "").lower().strip()
                     
